@@ -18,8 +18,12 @@ const lookEl = document.getElementById('look');
 const mini = document.getElementById('mini');
 const mctx = mini.getContext('2d');
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// Phones get the on-screen stick plus a lighter render budget.
+const isTouch = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+if (isTouch) document.body.classList.add('touch');
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isTouch });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, isTouch ? 1.5 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -39,7 +43,7 @@ scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff1d6, 1.35);
 sun.position.set(mirrorX(18), 22, 8);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.mapSize.set(isTouch ? 1024 : 2048, isTouch ? 1024 : 2048);
 sun.shadow.camera.left = -28;
 sun.shadow.camera.right = 22;
 sun.shadow.camera.top = 24;
@@ -59,11 +63,33 @@ const props = createProceduralProps();
 for (const g of props.groups) scene.add(g);
 
 const colliders = [...walls.colliders, ...props.colliders];
-const { poll } = createControls(camera, canvas, overlay);
+const { poll } = createControls(
+  camera,
+  canvas,
+  overlay,
+  isTouch
+    ? {
+        pad: document.getElementById('pad'),
+        knob: document.getElementById('knob'),
+        runBtn: document.getElementById('run'),
+      }
+    : null,
+);
 const topdown = createTopdown(camera, renderer);
+document.getElementById('mapbtn').addEventListener('click', () => topdown.toggle());
 const updateLook = bindLookLabel(camera, scene, lookEl);
 
 placeAssets(scene).then((extra) => colliders.push(...extra));
+window.__pos = () => {
+  const d = camera.getWorldDirection(new THREE.Vector3());
+  return {
+    x: camera.position.x,
+    z: camera.position.z,
+    yaw: Math.atan2(-d.x, -d.z),
+    pitch: Math.asin(d.y),
+    roll: new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ').z,
+  };
+};
 window.__teleport = (x, z, yaw) => {
   camera.position.x = x;
   camera.position.z = z;

@@ -12,6 +12,10 @@ export function createTopdown(camera, renderer) {
     if (e.code === 'KeyT') on = !on;
   });
   return {
+    toggle() {
+      on = !on;
+      return on;
+    },
     render(scene) {
       if (!on) return false;
       renderer.render(scene, cam);

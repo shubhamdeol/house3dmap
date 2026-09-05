@@ -130,6 +130,42 @@
         border: 1px solid #2a2118;
         box-shadow: 4px 4px 0 #8b3a2a;
       }
+      #door-action {
+        position: fixed;
+        left: 50%;
+        bottom: 2rem;
+        z-index: 6;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        transform: translateX(-50%);
+        padding: 0.65rem 0.85rem;
+        border: 1px solid rgba(243, 234, 216, 0.75);
+        border-radius: 0.75rem;
+        background: rgba(28, 23, 16, 0.82);
+        color: #f3ead8;
+        font: 600 0.92rem Figtree, sans-serif;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(6px);
+        cursor: pointer;
+      }
+      #door-action[hidden] {
+        display: none;
+      }
+      #door-action .door-icon {
+        display: grid;
+        place-items: center;
+        width: 1.8rem;
+        height: 1.8rem;
+        border: 1px solid currentColor;
+        border-radius: 0.2rem;
+        font-size: 1.15rem;
+        line-height: 1;
+      }
+      #door-action kbd {
+        margin-left: 0.15rem;
+        border: 1px solid rgba(243, 234, 216, 0.45);
+      }
 
       /* ---- touch controls ---- */
       #touch {
@@ -224,6 +260,11 @@
         #look {
           font-size: 0.85rem;
         }
+        #door-action {
+          bottom: calc(1.7rem + env(safe-area-inset-bottom));
+          min-height: 48px;
+          padding: 0.55rem 0.8rem;
+        }
         .card {
           padding: 1.5rem 1.4rem 1.3rem;
         }
@@ -249,6 +290,11 @@
       <button id="run" class="tbtn" type="button">RUN</button>
       <button id="mapbtn" class="tbtn" type="button">MAP</button>
     </div>
+    <button id="door-action" type="button" hidden>
+      <span class="door-icon" aria-hidden="true">▥</span>
+      <span class="door-label">Close door</span>
+      <kbd>E</kbd>
+    </button>
     <div id="overlay">
       <div class="card">
         <h1>Walk the compound</h1>

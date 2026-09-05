@@ -9,6 +9,7 @@ import { placeAssets } from './world/placements.js';
 import { createControls, setSpawn } from './player/controls.js';
 import { moveWithCollision } from './player/collision.js';
 import { drawMinimap, bindLookLabel } from './ui/hud.js';
+import { createDoorUI } from './ui/doors.js';
 import { createTopdown } from './debug/topdown.js';
 
 const canvas = document.getElementById('c');
@@ -78,6 +79,12 @@ const { poll } = createControls(
 const topdown = createTopdown(camera, renderer);
 document.getElementById('mapbtn').addEventListener('click', () => topdown.toggle());
 const updateLook = bindLookLabel(camera, scene, lookEl);
+const doorUI = createDoorUI(
+  camera,
+  props.interactions,
+  document.getElementById('door-action'),
+  isTouch,
+);
 
 placeAssets(scene).then((extra) => colliders.push(...extra));
 window.__pos = () => {
@@ -105,6 +112,7 @@ window.addEventListener('resize', () => {
 const clock = new THREE.Clock();
 function tick() {
   const dt = Math.min(clock.getDelta(), 0.05);
+  doorUI.update(dt);
   const { dx, dz } = poll(dt);
   moveWithCollision(camera.position, dx, dz, colliders);
   camera.position.y = EYE;

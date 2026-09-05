@@ -24,10 +24,12 @@ function resolveAxis(p, c, axis) {
 export function moveWithCollision(pos, dx, dz, colliders) {
   pos.x += dx;
   for (const c of colliders) {
+    if (c.active === false) continue;
     if (overlap(pos.x, pos.z, c)) resolveAxis(pos, c, 'x');
   }
   pos.z += dz;
   for (const c of colliders) {
+    if (c.active === false) continue;
     if (overlap(pos.x, pos.z, c)) resolveAxis(pos, c, 'z');
   }
 }

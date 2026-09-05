@@ -49,6 +49,31 @@ function grp(x, z, yaw, name) {
   return label(place(new THREE.Group(), x, z, yaw), name);
 }
 
+function doorInteraction(object, collider, apply, range = 2.3) {
+  let progress = 0; // 0 = open, 1 = closed
+  let target = 0;
+  collider.active = false;
+  return {
+    object,
+    collider,
+    range,
+    get isOpen() { return target === 0; },
+    toggle() {
+      target = target === 0 ? 1 : 0;
+      // Release the doorway as soon as opening begins.
+      if (target === 0) collider.active = false;
+    },
+    update(dt) {
+      const step = Math.min(1, dt * 6);
+      progress += (target - progress) * step;
+      if (Math.abs(target - progress) < 0.002) progress = target;
+      apply(progress);
+      // Block passage only when the door is almost fully closed.
+      collider.active = target === 1 && progress > 0.82;
+    },
+  };
+}
+
 function buildTreadmill() {
   const g = grp(4.7, 14.9, 90, 'Treadmill');
   g.add(box(0.85, 0.1, 2.0, M.steel, 0, 0.12, 0));
@@ -64,7 +89,7 @@ function buildTreadmill() {
 }
 
 function buildBench() {
-  const g = grp(5.7, 13.8, 45, 'Adjustable Bench Press');
+  const g = grp(6.3, 12.8, 0, 'Adjustable Bench Press');
   g.add(box(0.4, 0.07, 1.15, M.rubber, 0, 0.45, 0.15));
   g.add(box(0.35, 0.4, 0.06, M.steel, 0, 0.22, 0.55));
   g.add(box(0.35, 0.4, 0.06, M.steel, 0, 0.22, -0.25));
@@ -174,12 +199,36 @@ function buildCompost() {
 
 function buildSliderPanel() {
   const g = grp(8.3, 10.3, 0, 'Sliding Door');
-  g.add(box(1.8, 2.4, 0.05, M.glass, 0, 1.2, 0));
-  g.add(box(1.84, 0.06, 0.07, M.steel, 0, 0.05, 0));
-  g.add(box(1.84, 0.06, 0.07, M.steel, 0, 2.37, 0));
-  g.add(box(0.06, 2.4, 0.07, M.steel, -0.9, 1.2, 0));
-  g.add(box(0.06, 2.4, 0.07, M.steel, 0.9, 1.2, 0));
-  return g;
+  const leaf = () => {
+    const panel = new THREE.Group();
+    panel.add(box(1.8, 2.4, 0.05, M.glass, 0, 1.2, 0));
+    panel.add(box(1.84, 0.06, 0.07, M.steel, 0, 0.05, 0));
+    panel.add(box(1.84, 0.06, 0.07, M.steel, 0, 2.37, 0));
+    panel.add(box(0.06, 2.4, 0.07, M.steel, -0.9, 1.2, 0));
+    panel.add(box(0.06, 2.4, 0.07, M.steel, 0.9, 1.2, 0));
+    return panel;
+  };
+  const fixed = leaf();
+  const moving = leaf();
+  // The moving leaf runs on the second rail, avoiding coplanar glass flicker.
+  moving.position.z = 0.06;
+  g.add(fixed, moving);
+  g.updateMatrixWorld(true);
+  const fixedCollider = aabbFromObject(fixed);
+  fixedCollider.label = 'Sliding Door';
+  moving.position.x = -1.8;
+  g.updateMatrixWorld(true);
+  const collider = aabbFromObject(moving);
+  collider.label = 'Sliding Door';
+  moving.position.x = 0;
+  g.updateMatrixWorld(true);
+  return {
+    object: g,
+    interaction: doorInteraction(g, collider, (p) => {
+      moving.position.x = -p * 1.8;
+    }, 2.7),
+    staticCollider: fixedCollider,
+  };
 }
 
 function buildShutterDrum() {
@@ -188,7 +237,20 @@ function buildShutterDrum() {
   d.rotation.x = Math.PI / 2; g.add(d);
   g.add(box(0.3, 0.3, 0.1, M.steel, 0, 2.55, -2.0));
   g.add(box(0.3, 0.3, 0.1, M.steel, 0, 2.55, 2.0));
-  return g;
+  const panel = box(0.08, 2.4, 4.0, M.tin, 0, 3.8, 0);
+  g.add(panel);
+  panel.position.y = 1.2;
+  g.updateMatrixWorld(true);
+  const collider = aabbFromObject(panel);
+  collider.label = 'Sliding Shutter';
+  panel.position.y = 3.8;
+  g.updateMatrixWorld(true);
+  return {
+    object: g,
+    interaction: doorInteraction(g, collider, (p) => {
+      panel.position.y = 3.8 - p * 2.6;
+    }, 3.1),
+  };
 }
 
 function buildGateLeaf(hx, hz, dir, yaw) {
@@ -204,10 +266,22 @@ function buildGateLeaf(hx, hz, dir, yaw) {
 
 function buildDoor(hx, hz, w, h, yaw) {
   const g = grp(hx, hz, yaw, 'Door');
-  g.add(box(w, h, 0.04, M.wood, w / 2, h / 2, 0));
-  g.add(box(w - 0.1, 0.06, 0.05, M.wood, w / 2, h - 0.08, 0.01));
-  g.add(box(0.05, 0.05, 0.1, M.chrome, w - 0.12, 1.0, 0.04));
-  return g;
+  const pivot = new THREE.Group();
+  g.add(pivot);
+  pivot.add(box(w, h, 0.04, M.wood, w / 2, h / 2, 0));
+  pivot.add(box(w - 0.1, 0.06, 0.05, M.wood, w / 2, h - 0.08, 0.01));
+  pivot.add(box(0.05, 0.05, 0.1, M.chrome, w - 0.12, 1.0, 0.04));
+  pivot.rotation.y = Math.PI / 2;
+  g.updateMatrixWorld(true);
+  const collider = aabbFromObject(g);
+  pivot.rotation.y = 0;
+  g.updateMatrixWorld(true);
+  return {
+    object: g,
+    interaction: doorInteraction(g, collider, (p) => {
+      pivot.rotation.y = p * Math.PI / 2;
+    }),
+  };
 }
 
 export function createLowPolyAnimal(kind) {
@@ -281,11 +355,17 @@ export function createFallbackTractor() {
 }
 
 export function createProceduralProps() {
-  const groups = [], colliders = [];
+  const groups = [], colliders = [], interactions = [];
   const add = (g, collide) => {
     groups.push(g);
     if (collide) { g.updateMatrixWorld(true); colliders.push(aabbFromObject(g)); }
     return g;
+  };
+  const addDoor = ({ object, interaction, staticCollider }) => {
+    groups.push(object);
+    if (staticCollider) colliders.push(staticCollider);
+    colliders.push(interaction.collider);
+    interactions.push(interaction);
   };
 
   add(buildTreadmill(), true);
@@ -300,18 +380,18 @@ export function createProceduralProps() {
   add(buildWasteBin(0.6, 18.4), true);
   add(buildWasteBin(1.3, 18.4), true);
   add(buildCompost(), true);
-  add(buildSliderPanel(), true);
-  add(buildShutterDrum(), false);
+  addDoor(buildSliderPanel());
+  addDoor(buildShutterDrum());
   add(buildGateLeaf(16.2, 7.2, 1, 90), true);
   add(buildGateLeaf(16.2, 10.3, -1, -90), true);
-  add(buildDoor(1.35, 17.1, 0.9, 2.0, 90), true);
-  add(buildDoor(11.2, 7.2, 1.0, 2.1, -90), true);
-  add(buildDoor(4.1, 4.4, 1.2, 2.1, -90), true);
-  add(buildDoor(9.0, 4.4, 1.3, 2.1, -90), true);
+  addDoor(buildDoor(1.35, 17.1, 0.9, 2.0, 90));
+  addDoor(buildDoor(11.2, 7.2, 1.0, 2.1, -90));
+  addDoor(buildDoor(4.1, 4.4, 1.2, 2.1, -90));
+  addDoor(buildDoor(9.0, 4.4, 1.3, 2.1, -90));
 
   add(place(createLowPolyAnimal('cow'), 6.6, 1.9, 180), true);
   add(place(createLowPolyAnimal('cow2'), 8.0, 1.9, 180), true);
   add(place(createLowPolyAnimal('buffalo'), 9.4, 1.9, 180), true);
 
-  return { groups, colliders };
+  return { groups, colliders, interactions };
 }

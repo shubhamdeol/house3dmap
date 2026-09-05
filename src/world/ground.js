@@ -36,14 +36,6 @@ export function buildGround(mats) {
     for (const r of room.rects) g.add(rectMesh(r, 0.01, mat));
   }
 
-  const bay = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.6, 5.2),
-    new THREE.MeshStandardMaterial({ color: 0xcfc8b8, roughness: 0.85 }),
-  );
-  bay.rotation.x = -Math.PI / 2;
-  bay.position.set(mirrorX(18), 0.02, 12.8);
-  g.add(bay);
-
   const dashMat = new THREE.MeshStandardMaterial({ color: 0xe8d9a8 });
   for (let z = -1; z < 21; z += 3) {
     const dash = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 1.4), dashMat);

@@ -16,10 +16,10 @@ export function drawMinimap(ctx, player) {
   const yOf = (z) => h - pad - z * s;
 
   ctx.fillStyle = '#9aa3a8';
-  ctx.fillRect(planOf(19.4), yOf(PLOT.d), PLOT.roadW * s, PLOT.d * s);
+  ctx.fillRect(planOf(PLOT.w), yOf(PLOT.d), PLOT.roadW * s, PLOT.d * s);
   ctx.fillStyle = '#6e7378';
   for (const room of ROOMS) {
-    if (room.name !== 'Parking') continue;
+    if (room.name !== 'Open yard') continue;
     for (const r of room.rects) {
       ctx.fillRect(xOf(r.x1), yOf(r.z1), (r.x1 - r.x0) * s, (r.z1 - r.z0) * s);
     }

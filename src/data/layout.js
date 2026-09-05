@@ -1,4 +1,5 @@
-export const PLOT = { w: 19.4, d: 18.9, roadW: 6 };
+// The compound reaches the road edge — there is no parking apron in front.
+export const PLOT = { w: 16.2, d: 18.9, roadW: 6 };
 export const WALL_T = 0.2;
 export const EYE = 1.7;
 export const SPEED = 3;
@@ -8,26 +9,18 @@ export const RADIUS = 0.3;
 // Everything below is authored in plan coordinates: x runs east, z runs north,
 // matching the paper map. World space mirrors x (see mirrorX) so that the layout
 // reads the same way round as the drawing when seen from above.
-const SPAWN_PLAN = { x: 22, y: EYE, z: 8.75, yaw: Math.PI / 2 };
+const SPAWN_PLAN = { x: 19.2, y: EYE, z: 8.75, yaw: Math.PI / 2 };
 
 const WALLS_PLAN = [
   { id: 'W1a', x0: 0, z0: 0, x1: 16.2, z1: 0, h: 3 },
-  { id: 'W1b', x0: 16.2, z0: 0, x1: 19.4, z1: 0, h: 1.8 },
   { id: 'W2a', x0: 0, z0: 0, x1: 0, z1: 10.3, h: 3 },
   { id: 'W2b', x0: 0, z0: 10.3, x1: 0, z1: 18.9, h: 2.1 },
   { id: 'W3', x0: 0, z0: 18.9, x1: 3.6, z1: 18.9, h: 2.1 },
   { id: 'W4', x0: 3.6, z0: 18.9, x1: 3.6, z1: 15.5, h: 2.1 },
   { id: 'W5', x0: 3.6, z0: 15.5, x1: 12.1, z1: 15.5, h: 3 },
-  { id: 'W6', x0: 12.1, z0: 15.5, x1: 19.4, z1: 15.5, h: 1.8 },
-  {
-    id: 'W7',
-    x0: 19.4,
-    z0: 15.5,
-    x1: 19.4,
-    z1: 0,
-    h: 1.2,
-    openings: [{ start: 7.2, end: 10.3, h: 1.2, type: 'gap' }],
-  },
+  { id: 'W6', x0: 12.1, z0: 15.5, x1: 16.2, z1: 15.5, h: 1.8 },
+  // Road-side boundary of the open yard; the main gate (W14) carries the rest.
+  { id: 'W7', x0: 16.2, z0: 10.3, x1: 16.2, z1: 15.5, h: 1.8 },
   {
     id: 'W8',
     x0: 0,
@@ -58,7 +51,15 @@ const WALLS_PLAN = [
     openings: [{ start: 5.6, end: 9.2, h: 2.4, type: 'slider' }],
   },
   { id: 'W12', x0: 12.1, z0: 10.3, x1: 12.1, z1: 15.5, h: 3 },
-  { id: 'W13', x0: 12.1, z0: 10.3, x1: 16.2, z1: 10.3, h: 3 },
+  {
+    id: 'W13',
+    x0: 12.1,
+    z0: 10.3,
+    x1: 16.2,
+    z1: 10.3,
+    h: 3,
+    openings: [{ start: 13.2, end: 14.8, h: 3, type: 'gap' }],
+  },
   {
     id: 'W14',
     x0: 16.2,
@@ -148,17 +149,14 @@ const ROOMS_PLAN = [
     ],
   },
   {
-    name: 'Parking',
-    floor: 'asphalt',
-    rects: [
-      { x0: 12.1, z0: 10.3, x1: 19.4, z1: 15.5 },
-      { x0: 16.2, z0: 0, x1: 19.4, z1: 10.3 },
-    ],
+    name: 'Open yard',
+    floor: 'concrete',
+    rects: [{ x0: 12.1, z0: 10.3, x1: 16.2, z1: 15.5 }],
   },
   {
     name: 'Public road',
     floor: 'road',
-    rects: [{ x0: 19.4, z0: -2, x1: 25.4, z1: 22 }],
+    rects: [{ x0: PLOT.w, z0: -2, x1: PLOT.w + PLOT.roadW, z1: 22 }],
   },
 ];
 

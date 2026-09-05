@@ -41,7 +41,8 @@ export function buildRoofs(mats) {
 
 export function addRoomLights(scene) {
   const spots = [
-    [7.2, 2.75, 12.9],
+    [6.4, 2.75, 12.9],
+    [10.6, 2.75, 14.0],
     [13.3, 2.75, 3.6],
     [2.7, 2.75, 2.2],
     [8.0, 2.75, 2.2],

@@ -83,7 +83,7 @@ function buildBench() {
 }
 
 function buildDumbbellRack() {
-  const g = grp(9.7, 15.2, 180, 'Dumbbell Rack');
+  const g = grp(10.65, 15.15, 180, 'Dumbbell Rack');
   g.add(box(0.06, 0.75, 0.45, M.steel, -0.8, 0.375, 0));
   g.add(box(0.06, 0.75, 0.45, M.steel, 0.8, 0.375, 0));
   g.add(box(1.65, 0.05, 0.4, M.steel, 0, 0.4, 0));
@@ -99,7 +99,7 @@ function buildDumbbellRack() {
 }
 
 function buildPullupBar() {
-  const g = grp(10.45, 13.8, 0, 'Pull-up Bar');
+  const g = grp(11.65, 13.8, 0, 'Pull-up Bar');
   const bar = cyl(0.015, 0.015, 1.0, M.chrome, 0, 2.2, 0);
   bar.rotation.x = Math.PI / 2; g.add(bar);
   g.add(box(0.35, 0.05, 0.05, M.blackSteel, 0.175, 2.2, -0.4));
@@ -237,20 +237,21 @@ export function createLowPolyAnimal(kind) {
 
 export function createFallbackCar() {
   const g = new THREE.Group();
-  g.add(box(1.66, 0.4, 4.0, M.redPaint, 0, 0.5, 0));
-  g.add(box(1.5, 0.34, 2.0, M.redPaint, 0, 0.87, -0.25));
-  g.add(box(1.54, 0.2, 1.85, M.glass, 0, 0.89, -0.25));
-  g.add(box(1.7, 0.1, 0.14, M.chrome, 0, 0.38, 1.98));
-  g.add(box(1.7, 0.1, 0.14, M.chrome, 0, 0.38, -1.98));
-  g.add(box(0.28, 0.1, 0.06, M.tin, -0.55, 0.56, 1.99));
-  g.add(box(0.28, 0.1, 0.06, M.tin, 0.55, 0.56, 1.99));
+  g.add(box(1.6, 0.4, 3.5, M.redPaint, 0, 0.5, 0));
+  g.add(box(1.44, 0.34, 1.75, M.redPaint, 0, 0.87, -0.25));
+  g.add(box(1.48, 0.2, 1.62, M.glass, 0, 0.89, -0.25));
+  g.add(box(1.64, 0.1, 0.14, M.chrome, 0, 0.38, 1.73));
+  g.add(box(1.64, 0.1, 0.14, M.chrome, 0, 0.38, -1.73));
+  g.add(box(0.28, 0.1, 0.06, M.tin, -0.52, 0.56, 1.74));
+  g.add(box(0.28, 0.1, 0.06, M.tin, 0.52, 0.56, 1.74));
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
-    const w = cyl(0.29, 0.29, 0.22, M.rubber, sx * 0.76, 0.29, sz * 1.32, 16);
+    const w = cyl(0.29, 0.29, 0.22, M.rubber, sx * 0.73, 0.29, sz * 1.15, 16);
     w.rotation.z = Math.PI / 2; g.add(w);
-    const hub = cyl(0.13, 0.13, 0.24, M.chrome, sx * 0.76, 0.29, sz * 1.32, 12);
+    const hub = cyl(0.13, 0.13, 0.24, M.chrome, sx * 0.73, 0.29, sz * 1.15, 12);
     hub.rotation.z = Math.PI / 2; g.add(hub);
   }
-  place(g, 9.2, 12.6, 0);
+  // Parked along the slider side so the north half of the gym stays clear.
+  place(g, 8.6, 12.3, 0);
   return label(g, 'Car');
 }
 
